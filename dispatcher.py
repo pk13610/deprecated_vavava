@@ -105,7 +105,7 @@ class Dispatcher(vavava.basethread.BaseThread):
         self.log.info(info_str)
 
 # test ...............
-
+"""
 from vavava.workqueue import Work,RedoableWork
 class AddWorkWork(RedoableWork):
     def __init__(self,begin_time=None,end_time=None,period=None,log=None,name="<?test>"):
@@ -183,6 +183,7 @@ if __name__ == '__main__':
 
 
 
+"""
 
 
 
