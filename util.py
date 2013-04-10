@@ -1,37 +1,5 @@
 ﻿#!/usr/bin/env python
 # coding=utf-8
-# Author:  vavava
-
-__author__ = 'vavava'
-
-class test:
-    pass
-
-def parse_argvs(argvs):
-    """
-    usage:
-        from sys import argv
-        argv_dic=vavava.util.parse_argvs(argv)
-        if argv_dic:
-            if argv_dic.get('-ids'):  userTokens=argv_dic.get('-ids').split('|')
-            if argv_dic.get('-d'):  httpdebuglevel=argv_dic.get('-d')
-            if argv_dic.get('-t'):  socket_timeout=argv_dic.get('-t')
-    """
-    if len(argvs)<=1:
-        return
-    argv_dic={}
-    key=None
-    for each in argvs:
-        if each[0] == '-':
-            key=each
-        else:
-            if key is not None:
-                argv_dic[key]=each
-                key=None
-    if key is not None:
-        argv_dic[key]=key
-    return argv_dic
-
 
 def LogAdapter(log=None):
     import logging
@@ -49,7 +17,7 @@ def assure_path(path):
     if os.path.isdir(path) is not True:
         os.makedirs(path)
 
-def initlog(logfile=None,level=None):
+def initlog(logfile=None, level=None):
     import logging as logging
     if not level:
         level = logging.DEBUG
@@ -70,6 +38,9 @@ def initlog(logfile=None,level=None):
     return logger
 
 class SynDict(object):
+    """
+    a syn dict
+    """
     from threading import Lock
     def __init__(self):
         self._dict = {}
@@ -89,23 +60,25 @@ class SynDict(object):
         return v
 
 import re
+
 def reg_helper(text,reg_str="",mode=re.I|re.S):
     reg=re.compile(reg_str,mode)
     return reg.findall(text)
 
 def importAny(name):
     try:
-        return __import__(name,fromlist=[''])
+        return __import__(name, fromlist=[''])
     except:
         try:
             i = name.rfind('.')
-            mod = __import__(name[:i],fromlist=[''])
-            return getattr(mod,name[i+1:])
+            mod = __import__(name[:i], fromlist=[''])
+            return getattr(mod, name[i+1:])
         except:
             raise RuntimeError('No module of: %s found'%(name))
+
 def get_sufix(name):
-    re = os.path.splitext(name)[1][1:]
-    return re
+    return os.path.splitext(name)[1][1:]
+
 def copy_dir(sourceDir, targetDir, types={}):
     sourceDir = os.path.abspath(sourceDir)
     targetDir = os.path.abspath(targetDir)
