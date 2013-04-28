@@ -1,6 +1,9 @@
 ﻿#!/usr/bin/env python
 # coding=utf-8
 
+import re
+import os.path
+
 def LogAdapter(log=None):
     import logging
     if log is None:
@@ -13,8 +16,7 @@ def LogAdapter(log=None):
     return log
 
 def assure_path(path):
-    import os.path
-    if os.path.isdir(path) is not True:
+    if not os.path.isdir(path):
         os.makedirs(path)
 
 def initlog(logfile=None, level=None):
@@ -45,12 +47,10 @@ class SynDict(object):
     def __init__(self):
         self._dict = {}
         self._mt = Lock()
-
     def add(self,k,v):
         self._mt.acquire()
         self._dict[k]=v
         self._mt.release()
-
     def popitem(self):
         v = None
         self._mt.acquire()
@@ -59,10 +59,8 @@ class SynDict(object):
         self._mt.release()
         return v
 
-import re
-
-def reg_helper(text,reg_str="",mode=re.I|re.S):
-    reg=re.compile(reg_str,mode)
+def reg_helper(text, reg_str="", mode=re.I|re.S):
+    reg = re.compile(reg_str,mode)
     return reg.findall(text)
 
 def importAny(name):
@@ -93,6 +91,12 @@ def copy_dir(sourceDir, targetDir, types={}):
         if os.path.isdir(sourceF):
             copy_dir( sourceF, targetF, types )
 
+def openfile(name, mode):
+    fullname = os.path.abspath(name)
+    path = os.path.split(fullname)[0]
+    if not os.path.isdir(path):
+        os.makedirs(path)
+    return open(name, mode)
 ##################################################################################################
 def test_log():
     log = LogAdapter(log=None, name="test")
@@ -125,7 +129,8 @@ else:
     from time import time as _interval_timer
 
 if __name__ == '__main__':
-    test_log()
+    openfile(r'c:\1\2\3\abc.k', "wb ")
+    #test_log()
 
 """ 如何判断平台类型
 def TestPlatform():
