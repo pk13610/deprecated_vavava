@@ -6,15 +6,18 @@ if __name__ == '__main__':
     import sys,os
     sys.path.insert(0,os.path.join( os.getcwd(), '..' ))
 
-import urllib,urllib2,socket
+import urllib
+import urllib2
+import socket
 from cookielib import LWPCookieJar
-from vavava.util import  LogAdapter
 from gzip import GzipFile
 from io import BytesIO
+from vavava.util import  LogAdapter
+
 
 class HttpClient(object):
     """ a simple client of http"""
-    def __init__(self,log=None,debug_level=1,req_timeout=30):
+    def __init__(self,log=None,debug_level=0,req_timeout=30):
         self.__log = LogAdapter(log)
         self.__content = None
         self.__cookie = None
@@ -26,28 +29,22 @@ class HttpClient(object):
         self.__proxy_enable = False
         self.__proxy_dic = None
         self._opener = None
+        self.__is_busy = False
         self.__buffer_size = 1024*100
         self.SetDebugLevel(debug_level)
         self.header_refer_ = "http://www.google.com/"
         self.header_user_agent_ = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6'
-    def __del__(self):
-        print "delete"
-    def Get(self,url,callback=None):
+    def Get(self,url,download_callback=None):
         if self._opener is None:
             self.__install_opener()
         self.__init_header(url)
         socket.setdefaulttimeout(self.__req_timeout)
         req = urllib2.Request(url,headers=self.__headers_dic)
         resp = self._opener.open(req,timeout=self.__req_timeout)
-        if callback:
-            data = resp.read(self.__buffer_size)
-            while data:
-                if not callback.write(data):
-                    return
-                data = resp.read(self.__buffer_size)
-        else:
-            self.__content = resp.read()
-            return self.__content
+        if url != resp.url:
+            self.__log.debug("%s redirect to :%s", url, resp.url)
+        self.__content = resp.read()
+        return self.__content
     def Post(self,url,post_dic):
         if self._opener is None:
             self.__install_opener()
@@ -58,6 +55,25 @@ class HttpClient(object):
         resp = self._opener.open(req)
         self.__content = resp.read(self.__buffer_size)
         return self.__content
+    def GetData(self, url, fp, duration=None, buffer_size=1024*1024):
+        if duration:
+            stop_time = time.clock() + float(duration)
+        if self._opener is None:
+            self.__install_opener()
+        self.__init_header(url)
+        socket.setdefaulttimeout(self.__req_timeout)
+        req = urllib2.Request(url,headers=self.__headers_dic)
+        resp = self._opener.open(req,timeout=self.__req_timeout)
+        if url != resp.url:
+            self.__log.debug("%s redirect to :%s", url, resp.url)
+        data = resp.read(buffer_size)
+        while data:
+            fp.write(data)
+            print duration, stop_time, time.clock()
+            if duration and stop_time < time.clock():
+                return
+            else:
+                data = resp.read(buffer_size)
     def EnableCookieSupport(self,enable=True):
         if enable and self.__cookie is None:
             self.__cookie = LWPCookieJar()
@@ -100,36 +116,37 @@ class HttpClient(object):
             if self.__cookie_str.strip() != "":
                 self.__headers_dic['Set-Cookie'] = self.__cookie_str
         return self.__headers_dic
-#######################ContentEncodingProcessor#################################
+    #######################ContentEncodingProcessor#################################
 # copy from http://www.pythonclub.org/python-network-application/observer-spider
 import zlib
 class ContentEncodingProcessor(urllib2.BaseHandler):
-  """A handler to add gzip capabilities to urllib2 requests """
-  # add headers to requests
-  def http_request(self, req):
-    req.add_header("Accept-Encoding", "gzip, deflate")
-    return req
-  # decode
-  def http_response(self, req, resp):
-    old_resp = resp
-    # gzip
-    if resp.headers.get("content-encoding") == "gzip":
-        gz = GzipFile( fileobj=BytesIO(resp.read()), mode="r" )
-        resp = urllib2.addinfourl(gz, old_resp.headers, old_resp.url, old_resp.code)
-        resp.msg = old_resp.msg
-    # deflate
-    if resp.headers.get("content-encoding") == "deflate":
-        gz = BytesIO( deflate(resp.read()) )
-        resp = urllib2.addinfourl(gz, old_resp.headers, old_resp.url, old_resp.code)  # 'class to add info() and
-        resp.msg = old_resp.msg
-    return resp
-# deflate support
+    """A handler to add gzip capabilities to urllib2 requests """
+    # add headers to requests
+    def http_request(self, req):
+        req.add_header("Accept-Encoding", "gzip, deflate")
+        return req
+        # decode
+    def http_response(self, req, resp):
+        old_resp = resp
+        # gzip
+        if resp.headers.get("content-encoding") == "gzip":
+            gz = GzipFile( fileobj=BytesIO(resp.read()), mode="r" )
+            resp = urllib2.addinfourl(gz, old_resp.headers, old_resp.url, old_resp.code)
+            resp.msg = old_resp.msg
+            # deflate
+        if resp.headers.get("content-encoding") == "deflate":
+            gz = BytesIO( deflate(resp.read()) )
+            resp = urllib2.addinfourl(gz, old_resp.headers, old_resp.url, old_resp.code)  # 'class to add info() and
+            resp.msg = old_resp.msg
+        return resp
+    # deflate support
 def deflate(data):   # zlib only provides the zlib compress format, not the deflate format;
-  try:               # so on top of all there's this workaround:
-    return zlib.decompress(data, -zlib.MAX_WBITS)
-  except zlib.error:
-    return zlib.decompress(data)
+    try:               # so on top of all there's this workaround:
+        return zlib.decompress(data, -zlib.MAX_WBITS)
+    except zlib.error:
+        return zlib.decompress(data)
 #######################ContentEncodingProcessor#################################
+
 
 # test code  ########################################################################
 def test_get():
