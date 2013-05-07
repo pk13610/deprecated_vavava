@@ -21,7 +21,7 @@ def encryptsign_data(data, key):
     key = hashkey(key)
     iv = Random.new().read(AES.block_size)
     cipher = AES.new(key, AES.MODE_CBC, iv)
-    pad = BLOCK_SIZE - len(data) % BLOCK_SIZE
+    pad = BLOCK_SIZE - len(data) % BLOCK_SIZE #buffer must be n*BLOCK_SIZE
     data = data + pad * chr(pad)
     data = iv + cipher.encrypt(data)
     sig = HMAC.new(key, data, SHA256).digest()
@@ -38,7 +38,7 @@ def decryptsign_data(data, key):
     data = data[16:]
     cipher = AES.new(key, AES.MODE_CBC, iv)
     data = cipher.decrypt(data)
-    return data[:-ord(data[-1])]
+    return data [:-ord(data[-1])]
 
 def encryptsign_file(file_name, password):
     fp = open(file_name, 'rb')
@@ -54,10 +54,9 @@ def decryptsign_file(file_name, password):
     decrypted_file = open(file_name+'.decrypted', 'wb')
     decrypted_file.write(decryptsign_data(fp.read(), hashlib.md5(password).digest()))
 
-pwd = '2134adf'
-pwd1 = '2134adf1111'
-f = 'test.rmvb'
-encryptsign_file( f, pwd)
-print 'decrypt ....'
-decryptsign_file( f+'.encrypted', pwd)
-print 'ok'
+
+if __name__ == '__main__':
+    data = encryptsign_data( '0123456789', '2134adf')
+    print 'decrypt ....'
+    print decryptsign_data( data, '2134adf')
+    print 'ok'
