@@ -25,34 +25,37 @@ class VersionStruct(ct.LittleEndianStructure):
     ]
 
 class Version:
-    def __init__(self, version, vtype='s'):
-        if vtype == 's':
-            self.version_string = version
+    STRING = 1
+    STRUCT = 2
+    def __init__(self, version, vtype=STRING):
+        if vtype == Version.STRING:
+            self.string = version
             v = version.split('.')
             if len(v) != 3:
                 raise "invilid version"
             self.v1 = int(v[0])
             self.v2 = int(v[1])
             self.v3 = int(v[2])
-            self.__version_struct = VersionStruct(self.v1, self.v2, self.v3)
-            self.version_binary = struct2stream(self.__version_struct)
-        elif vtype == 'b':
-            self.version_binary = version
-            self.__version_struct = stream2struct(version, VersionStruct)
-            self.v1 = self.__version_struct.v1
-            self.v2 = self.__version_struct.v2
-            self.v3 = self.__version_struct.v3
-            self.version_string = '%d.%d.%d' % (self.v1, self.v2, self.v3)
+            self.struct = VersionStruct(self.v1, self.v2, self.v3)
+            self.stream = struct2stream(self.struct)
+        elif vtype == Version.STRUCT:
+            self.stream = version
+            self.struct = stream2struct(version, VersionStruct)
+            self.v1 = self.struct.v1
+            self.v2 = self.struct.v2
+            self.v3 = self.struct.v3
+            self.string = '%d.%d.%d' % (self.v1, self.v2, self.v3)
         else:
             raise "Invilad param"
 
 
-#v = Version(r'1.0.256','s')
-v = Version(b'\x01\x02\x03\x00','b')
-print v.v1
-print v.v2
-print v.v3
-print "%r"%v.version_binary
-print v.version_string
+if __name__ == '__main__':
+    v = Version(r'1.0.256')
+    #v = Version(b'\x01\x02\x03\x00', Version.STRUCT)
+    print v.v1
+    print v.v2
+    print v.v3
+    print "%r"%v.stream
+    print v.string
 
 
