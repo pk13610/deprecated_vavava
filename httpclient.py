@@ -45,6 +45,14 @@ class HttpClient(object):
             self.__log.debug("%s redirect to :%s", url, resp.url)
         self.__content = resp.read()
         return self.__content
+    def TryGet(self,url,download_callback=None, retry=3):
+        try:
+            return self.Get(url,download_callback)
+        except Exception as e:
+            if retry > 0:
+                retry -= 1
+            else:
+                raise
     def Post(self,url,post_dic):
         if self._opener is None:
             self.__install_opener()
