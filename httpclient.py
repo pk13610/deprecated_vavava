@@ -63,6 +63,7 @@ class HttpClient(object):
         resp = self._opener.open(req)
         self.__content = resp.read(self.__buffer_size)
         return self.__content
+
     def GetData(self, url, fp, duration=None, buffer_size=1024*1024):
         if duration:
             stop_time = time.clock() + float(duration)
@@ -77,11 +78,11 @@ class HttpClient(object):
         data = resp.read(buffer_size)
         while data:
             fp.write(data)
-            print duration, stop_time, time.clock()
             if duration and stop_time < time.clock():
                 return
             else:
                 data = resp.read(buffer_size)
+
     def EnableCookieSupport(self,enable=True):
         if enable and self.__cookie is None:
             self.__cookie = LWPCookieJar()
