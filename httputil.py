@@ -46,9 +46,9 @@ class HttpUtil(object):
     def fetch(self, url, handler, post_data=None):
         if handler is None:
             raise ValueError, "need handler"
-        self._opener.add_handler(handler)
         self._init(force=True)
-        self._request(url,post_data)
+        self._opener.add_handler(handler)
+        self._request(url, post_data)
 
     def add_header(self, key, value):
         self._headers[key] = value
@@ -79,35 +79,26 @@ class HttpUtil(object):
 
 import time
 class DownloadStreamHandler(urllib2.BaseHandler):
-    """ download a stream by duration
-        duration --> s
-    """
-    def __init__(self, fp, duration, buffsize=1400):
-        self.buffsize = buffsize
+
+    def __init__(self, fp, duration=None, size=1400):
+        self.buff_size = size
         self.fp = fp
-        self.stop_time = duration + time.time()
+        self.duration = duration
         if duration:
-            self.handle = self.handle0
-        else:
-            self.handle = self.handle1
+            self.stop_time = duration + time.time()
 
     def http_request(self, req):
         return req
 
     def http_response(self, req, resp):
-        time.clock()
-        while self.handle(resp.read(self.buffsize)):
+        while self.handle(resp.read(self.buff_size)):
             pass
         return resp
 
-    def handle0(self, data):
+    def handle(self, data):
         if not data: return False
         self.fp.write(data)
-        return self.stop_time > time.time()
-
-    def handle1(self, data):
-        if not data: return False
-        return self.fp.write(data) is None
+        return self.duration is None or self.stop_time > time.time()
 
 import gzip
 import zlib
@@ -155,7 +146,7 @@ def test_fetch():
     url = r'http://pb.hd.sohu.com.cn/stats.gif?msg=caltime&vid=772959&tvid=596204&ua=pp&isHD=21&pid=348552429&uid=13832983422211404270&out=0&playListId=5029335&nid=353924663&tc=2400&type=vrs&cateid=&userid=&uuid=779b9c99-3c3a-52bc-2622-8bb0218cad5d&isp2p=0&catcode=101&systype=0&act=&st=144792%3B6560%3B143697%3B143699&ar=10&ye=2010&ag=5%u5C81%u4EE5%u4E0B&lb=2&xuid=&passport=&fver=201311211515&url=http%3A//tv.sohu.com/20120925/n353924663.shtml&lf=http%253A%252F%252Fv.baidu.com%252Fv%253Fword%253D%2525CA%2525AE%2525D2%2525BB%2525C2%2525DE%2525BA%2525BA%2526ct%253D301989888%2526rn%253D20%2526pn%253D0%2526db%253D0%2526s%253D0%2526fbl%253D800&autoplay=1&refer=http%3A//tv.sohu.com/20120925/n353924666.shtml&t=0.24127451563254'
     client = HttpUtil()
     #client.set_proxy({"http":"http://127.0.0.1:8087"})
-    handle = DownloadStreamhandler(open('/Users/pk/Downloads/tmp.flv', 'w'), duration=10)
+    handle = DownloadStreamHandler(open('/Users/pk/Downloads/tmp.flv', 'w'), duration=10)
     client.fetch(url, handle)
 
 if __name__ == '__main__':
