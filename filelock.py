@@ -1,9 +1,8 @@
 #####################################################################
-# COPY FROM http://www.gnome.org/~jdub/bzr/planet/2.0/planet/htmltmpl.py
+# http://www.gnome.org/~jdub/bzr/planet/2.0/planet/htmltmpl.py
 # and inspired from http://www.python.org/pypi/zc.lockfile
 # LICENSE: BSD
 # Modified by: Limodou(limodou@gmail.com)
-# Modified by: vavava, add timeout lock --> try_lock
 #####################################################################
 
 __all__ = ['LOCK_EX', 'LOCK_SH', 'LOCK_UN', 'lock_file', 'unlock_file',
@@ -116,67 +115,3 @@ class LockFile(BaseThread):
         if self._locked:
             self.close()
             self.delete()
-            print "deleted"
-"""
-    def try_lock(self,lock_flag=LOCK_SH,tout=3):
-        import signal, errno
-        from contextlib import contextmanager
-
-        @contextmanager
-        def timeout(seconds):
-            def timeout_handler(signum, frame):
-                pass
-            original_handler = signal.signal(signal.SIGALRM, timeout_handler)
-            try:
-                signal.alarm(seconds)
-                yield
-            finally:
-                signal.alarm(0)
-                signal.signal(signal.SIGALRM, original_handler)
-
-        with timeout(tout):
-            self.lock(lock_flag)
-"""
-
-def test():
-    import os,time
-    cpid = os.fork()
-    while True:
-
-        if cpid == 0:
-            fl = LockFile(name="file_lock_test.lock")
-            fl.lock()
-            print "child Locked:",str(fl._locked)
-            time.sleep(1)
-            fl._unlock()
-            print "child locked:",str(fl._locked)
-        else:
-            ff = LockFile(name="file_lock_test.lock")
-            print "parent Locked:",str(ff._locked)
-            time.sleep(0.3)
-            ff._unlock()
-            print "parent Locked:",str(ff._locked)
-
-def test1():
-    import time
-    fl = LockFile("file_lock_test.lock")
-    fl.try_lock(LOCK_EX)
-    if not fl._locked:
-        print "is locked"
-        return
-    while True:
-        time.sleep(1)
-        print "I have lock"
-
-if __name__ == "__main__":
-    test1()
-
-
-
-
-
-
-
-
-
-

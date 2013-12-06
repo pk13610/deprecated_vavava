@@ -1,33 +1,15 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-# if __name__ == '__main__':
-#     """ for file debug"""
-#     import sys,os
-#     sys.path.insert(0,os.path.join( os.getcwd(), '..' ))
-
 import threading
 from threading import Thread,Event,Lock
-from vavava.util import LogAdapter,_interval_timer
-
-__author__ = 'vavava'
-"""
-usage:
-    while self.IsRunning:
-        if not self.IsPaused:
-            ....
-            do something
-            ....
-        else:
-            wait for a while
-"""
-
+from vavava.util import get_logger
 
 class BaseThread(object):
     def __init__(self, name="<?thread>", log=None):
         self._name = name
         self._thread = None
-        self.log = LogAdapter(log)
+        self.log = get_logger(log)
         self._is_paused=threading.Event()
         self._is_paused.clear()
         self._is_running=threading.Event()
@@ -39,16 +21,7 @@ class BaseThread(object):
         self._is_paused.clear()
 
     def run(self):
-        """
-        usage:
-            while self.IsRunning:
-                if not self.IsPaused:
-                    ....
-                    do something
-                    ....
-                else:
-                    wait for a while
-        """
+        pass
 
     def running_start(self):
         if not self.IsRunning:
@@ -118,73 +91,3 @@ class BaseThread(object):
         if self.IsRunning:
             self.running_stop()
             raise Exception("thread is running on __del__")
-
-
-
-
-# test .................................................
-
-class TThread(BaseThread):
-    def __init__(self,seq,log):
-        BaseThread.__init__(self,log=log)
-        self.seq=seq
-
-    def run(self):
-        while self.IsRunning:
-            if self.IsPaused:
-                import time
-                self.log.debug("_thread waiting %d ",self.seq)
-                time.sleep(1)
-            else:
-                self.log.debug("_thread running %d ",self.seq)
-        self.log.debug("_thread out %d",self.seq)
-
-def test1(log):
-    import time
-    tt1=TThread(seq=1,log=log)
-    try:
-        while True:
-            log.debug('main _thread(%f):start',_interval_timer())
-            tt1.running_start()
-            time.sleep(0.4)
-            tt1.running_stop()
-            tt1.join(1)
-            time.sleep(1)
-    except(KeyboardInterrupt):
-        log.debug('main _thread(%f):stop timer',_interval_timer())
-        tt1.running_stop()
-        tt1.join(1)
-        #tt2.stop()
-        #tt3.stop()
-        log.debug('main _thread(%f):stopped',_interval_timer())
-
-
-def test2(log):
-    import time
-    tt1=TThread(seq=1,log=log)
-    #tt2=TThread(2)
-    #tt3=TThread(3)
-
-    log.debug('main _thread(%f):start',_interval_timer())
-    tt1.running_start()
-    #tt2.start()
-    #tt3.start()
-    try:
-        while True:
-            if not tt1.IsPaused:
-                tt1.running_pause()
-            else:
-                tt1.running_resume()
-            time.sleep(2)
-    except(KeyboardInterrupt):
-        log.debug('main _thread(%f):stop timer',_interval_timer())
-        tt1.running_stop()
-        #tt2.stop()
-        #tt3.stop()
-        log.debug('main _thread(%f):stopped',_interval_timer())
-
-if __name__ == '__main__':
-    import vavava.util
-    log = vavava.util.initlog("./log/test_dbworkshop.log")
-    test2(log)
-

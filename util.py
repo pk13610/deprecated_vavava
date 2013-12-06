@@ -3,6 +3,9 @@
 
 import re
 import os.path
+import time
+
+get_time_string = lambda : time.strftime("%Y%m%d%H%M%S", time.localtime())
 
 def assure_path(path):
     if not os.path.isdir(path):
