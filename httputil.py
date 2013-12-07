@@ -9,7 +9,7 @@ from io import BytesIO
 
 DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6'
 DEFAULT_REFERER = "http://www.google.com/"
-DEFAULT_BUFFER_SIZE = 1024*100
+DEFAULT_BUFFER_SIZE = 1024*1024
 DEFAULT_CHARSET = "utf8"
 DEFAULT_TIMEOUT = 30 #MS
 DEFAULT_DEBUG_LVL = 0
