@@ -20,34 +20,41 @@ class DBBase:
         self.conn.execute(sql)
 
 class WorkBase:
-    def handle(self):
+    def handle(self, db):
         raise r"uncomplete implament"
 
-class dbpool:
+class dbpool(threading.Thread):
     def __init__(self, path, cls=DBBase):
+        threading.Thread.__init__(self)
+        self.daemon = True
         self.db = None
         self.path = path
         self.cls = cls
         self.que = Queue.Queue()
         self.ev = threading.Event()
+        self.start()
 
     def queue_work(self, work):
         self.que.put(work)
 
-    def _runnable(self):
+    def run(self):
         self.db = self.cls(self.path)
-        while self.ev.isSet():
+        while not self.ev.isSet():
             dbop = self.que.get(timeout=3)
             if dbop:
-                dbop.handle()
-
-    def run(self):
-        self.th = threading.Thread(target=self._runnable())
-        self.th.daemon = True
-        self.ev.clear()
-        self.th.start()
+                dbop.handle(self.db)
 
     def stop(self):
-        if self.th:
-            self.ev.set()
-            self.th.join(30)
+        self.ev.set()
+
+if __name__ == "__main__":
+    import time
+    class testwork(WorkBase):
+        def __init__(self):
+            self.name = 'aaa'
+        def handle(self):
+            print 'yes ', self.name
+    pool = dbpool(None)
+    for i in range(10):
+        pool.queue_work(testwork())
+        time.sleep(1)
