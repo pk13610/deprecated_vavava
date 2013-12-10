@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # coding:utf-8
 
-import sys, os
+import sys
+import os
 
 def is_in_path(file_path):    
     file_path = os.path.abspath(file_path)
@@ -20,13 +21,15 @@ def is_in_path(file_path):
             return
     print "NO"
 
-arg=sys.argv[1]
+def check(arg):
+    if arg == 'path':
+        for p in sys.path:
+            print p
+    elif arg.endswith('/'):
+        is_in_path(arg)
+    else:
+        exec('import ' + arg)
+        exec('print ' + arg + ".__file__")
 
-if arg == 'path':
-    for p in sys.path:
-        print p
-elif arg.endswith('/'):
-    is_in_path(arg)
-else:
-    exec('import ' + arg)
-    exec('print ' + arg + ".__file__")
+if __name__ == "__main__":
+    check(sys.argv[1])
