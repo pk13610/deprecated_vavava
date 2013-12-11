@@ -7,6 +7,22 @@ import time
 
 get_time_string = lambda : time.strftime("%Y%m%d%H%M%S", time.localtime())
 
+
+import signal
+class SignalHandler:
+    """handle SIGTERM signal for current process """
+    def __init__(self, sig=signal.SIGTERM, callback=None):
+        self.handle = self._handle
+        self.callback = callback
+        signal.signal(sig, self.handle)
+
+    def _handle(self, signum, frame):
+        if signum is signal.SIGTERM:
+            if self.callback:
+                self.callback()
+            else:
+                exit(0)
+
 def assure_path(path):
     if not os.path.isdir(path):
         os.makedirs(path)
