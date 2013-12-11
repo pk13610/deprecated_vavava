@@ -4,6 +4,10 @@
 import sys
 import os
 
+def ensure_utf8():
+    print 'current encoding is ', sys.getdefaultencoding()
+    reload(sys).setdefaultencoding("utf8")
+
 def is_in_path(file_path):    
     file_path = os.path.abspath(file_path)
     if os.path.isfile(file_path):
