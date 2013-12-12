@@ -32,7 +32,7 @@ def assure_path(path):
         os.makedirs(path)
 
 import logging
-def get_logger(logfile=None, level=logging.DEBUG):
+def get_logger(logfile=None, stream=sys.stdout, level=logging.DEBUG):
     logger = logging.getLogger()
     if logfile:
         hdlr = logging.FileHandler(logfile)
