@@ -40,6 +40,9 @@ class dbpool(threading.Thread):
     def run(self):
         self.db = self.cls(self.path)
         while not self.ev.isSet():
+            if self.que.qsize() == 0:
+                self.ev.clear()
+                continue
             dbop = self.que.get(timeout=3)
             if dbop:
                 dbop.handle(self.db)

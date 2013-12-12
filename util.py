@@ -2,11 +2,15 @@
 # coding=utf-8
 
 import re
+import sys
 import os.path
 import time
+import chardet
 
 get_time_string = lambda : time.strftime("%Y%m%d%H%M%S", time.localtime())
-
+get_charset = lambda ss: chardet.detect(ss)['encoding']
+set_default_utf8 = lambda : reload(sys).setdefaultencoding("utf8")
+get_file_sufix = lambda name: os.path.splitext(name)[1][1:]
 
 import signal
 class SignalHandler:
@@ -44,32 +48,12 @@ def get_logger(logfile=None, level=logging.DEBUG):
     logger.setLevel(level)
     return logger
 
-import threading
-class SynDict(object):
-    """
-    a syn dict
-    """
-    from threading import Lock
-    def __init__(self):
-        self._dict = {}
-        self._mt = threading.Lock()
-    def add(self,k,v):
-        self._mt.acquire()
-        self._dict[k]=v
-        self._mt.release()
-    def popitem(self):
-        v = None
-        self._mt.acquire()
-        if len(self._dict) > 0:
-            k,v = self._dict.popitem()
-        self._mt.release()
-        return v
-
 def reg_helper(text, reg_str="", mode=re.I|re.S):
     reg = re.compile(reg_str,mode)
     return reg.findall(text)
 
 def importAny(name):
+    """ import module at any place """
     try:
         return __import__(name, fromlist=[''])
     except:
@@ -80,9 +64,6 @@ def importAny(name):
         except:
             raise RuntimeError('No module of: %s found'%(name))
 
-def get_sufix(name):
-    return os.path.splitext(name)[1][1:]
-
 def copy_dir(sourceDir, targetDir, types={}):
     sourceDir = os.path.abspath(sourceDir)
     targetDir = os.path.abspath(targetDir)
@@ -92,7 +73,7 @@ def copy_dir(sourceDir, targetDir, types={}):
         if os.path.isfile(sourceF):
             if not os.path.exists(targetDir):
                 os.makedirs(targetDir)
-            if types.has_key(get_sufix(f)):
+            if types.has_key(get_file_sufix(f)):
                 open(targetF, "wb").write(open(sourceF, "rb").read())
         if os.path.isdir(sourceF):
             copy_dir( sourceF, targetF, types )

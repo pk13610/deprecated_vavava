@@ -16,7 +16,6 @@ DEFAULT_DEBUG_LVL = 0
 
 class HttpUtil(object):
     """ a simple client of http"""
-
     def __init__(self,
                  charset=DEFAULT_CHARSET,
                  cookie=LWPCookieJar(),
