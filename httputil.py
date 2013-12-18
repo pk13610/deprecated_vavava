@@ -7,7 +7,8 @@ import socket
 from cookielib import LWPCookieJar
 from io import BytesIO
 
-DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6'
+DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; ' \
+                     'en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6'
 DEFAULT_REFERER = "http://www.google.com/"
 DEFAULT_BUFFER_SIZE = 1024*1024
 DEFAULT_CHARSET = "utf8"
@@ -19,9 +20,9 @@ class HttpUtil(object):
     def __init__(self,
                  charset=DEFAULT_CHARSET,
                  cookie=LWPCookieJar(),
-                 proxy=None,
                  timeout=DEFAULT_TIMEOUT,
                  debug_lvl=DEFAULT_DEBUG_LVL,
+                 proxy=None,
                  log=None):
         self._cookie = cookie
         self._timeout = timeout
