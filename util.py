@@ -84,5 +84,3 @@ def readfile(name):
     if not os.path.isdir(path):
         os.makedirs(path)
     return open(name, "r").readlines()
-
-
