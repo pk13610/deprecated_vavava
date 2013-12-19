@@ -13,7 +13,7 @@ set_default_utf8 = lambda : reload(sys).setdefaultencoding("utf8")
 get_file_sufix = lambda name: os.path.splitext(name)[1][1:]
 
 import signal
-class SignalHandler:
+class SignalHandlerBase:
     """handle SIGTERM signal for current process """
     def __init__(self, sig=signal.SIGTERM, callback=None):
         self.handle = self._handle
