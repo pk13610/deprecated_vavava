@@ -8,7 +8,7 @@ class SimpleJsonConfig:
             setattr(self, k, v)
 
     @staticmethod
-    def parse_config_file_from_argv(config_class=None):
+    def parse_config_file_from_argv(config_class=None, cofig_file=r'./config.json'):
         import getopt
         import sys
         config = None
@@ -29,7 +29,7 @@ class SimpleJsonConfig:
                 config = config_class(a)
                 break
         else:
-            config = config_class("./config.json")
+            config = config_class(cofig_file)
 
         params = dir(config)
         for param in params:

@@ -15,3 +15,8 @@ post = 'ss2012--11--3@12:1 123'
 tt = re.compile(r"(?P<tt>\d{4}(--|-)\d{1,2}(--|-)\d{1,2}(\s|@)\d{1,2}:\d{1,2})")
 mm = tt.findall(post)[0].replace('--', '-').replace('@', ' ')
 print mm
+
+
+import urllib2
+
+urllib2.open

@@ -84,3 +84,9 @@ def readfile(name):
     if not os.path.isdir(path):
         os.makedirs(path)
     return open(name, "r").readlines()
+
+def asure_path(path):
+    if not os.path.isdir(path):
+        asure_path(os.path.dirname(path))
+        os.mkdir(path)
+
