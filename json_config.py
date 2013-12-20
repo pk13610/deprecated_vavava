@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # coding=utf-8
 
+import json
+
 class SimpleJsonConfig:
-    def __init__(self, path):
-        import json
-        for k, v in json.load(open(path)).items():
-            setattr(self, k, v)
+    def __init__(self, path=None):
+        if path:
+            for k, v in json.load(open(path)).items():
+                setattr(self, k, v)
 
     @staticmethod
     def parse_config_file_from_argv(config_class=None, cofig_file=r'./config.json'):
