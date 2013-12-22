@@ -48,6 +48,15 @@ def get_logger(logfile=None, stream=sys.stdout, level=logging.DEBUG):
     logger.setLevel(level)
     return logger
 
+import json
+class JsonConfig:
+    def __init__(self, path=None, attrs=[]):
+        for attr in attrs:
+            setattr(self, attr, None)
+        if path:
+            for k, v in json.load(open(path)).items():
+                setattr(self, k, v)
+
 def reg_helper(text, reg_str="", mode=re.I|re.S):
     reg = re.compile(reg_str,mode)
     return reg.findall(text)
