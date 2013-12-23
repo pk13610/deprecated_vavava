@@ -87,7 +87,7 @@ class DownloadStreamHandler:
           other handler maybe cause a timeout I guess.
           so this handler works outside of urllib2.open()
     """
-    def __init__(self, fp, duration=-1, size=1400):
+    def __init__(self, fp, duration=0, size=1400):
         self.buff_size = size
         self.fp = fp
         self.duration = duration
@@ -107,8 +107,7 @@ class DownloadStreamHandler:
     def _handle(self, data):
         if not data: return False
         self.fp.write(data)
-        return self.duration == -1 \
-            or self.stop_time > time.time()
+        return self.duration <= 0 or self.stop_time > time.time()
 
 import gzip
 import zlib
