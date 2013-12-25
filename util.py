@@ -99,3 +99,46 @@ def asure_path(path):
         asure_path(os.path.dirname(path))
         os.mkdir(path)
 
+def walk(top, topdown=True, onerror=None, followlinks=False):
+    """
+    os.walk() ==> top, dirs, nondirs
+    walk() ==> top, dirs, files, dirlinks, filelinks, others
+    """
+    isfile, islink, join, isdir = os.path.isfile, os.path.islink, os.path.join, os.path.isdir
+    try:
+        names = os.listdir(top)
+    except os.error, os.err:
+        if onerror is not None:
+            onerror(os.err)
+        return
+
+    dirs, files, dlns, flns, others = [], [], [], [], []
+    for name in names:
+        fullname = join(top, name)
+        if isdir(fullname):
+            if islink(fullname):
+                dlns.append(name)
+            else:
+                dirs.append(name)
+        elif isfile(fullname):
+            if islink(fullname):
+                flns.append(name)
+            else:
+                files.append(name)
+        else:
+            others.append(name)
+
+    if topdown:
+        yield top, dirs, files, dlns, flns, others
+
+    for name in dirs:
+        for x in walk(join(top, name), topdown, onerror, followlinks):
+            yield x
+
+    if followlinks is True:
+        for dlink in dlns:
+            for x in walk(join(top, dlink), topdown, onerror, followlinks):
+                yield x
+
+    if not topdown:
+        yield top, dirs, files, dlns, flns, others

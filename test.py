@@ -1,22 +1,56 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-import httputil
-import util
-import time
-import re
-
-# print time.strptime(u"2013-11-22 10:01 PM".strip()[0: 16], "%Y-%m-%d %H:%M")
-
-post = 'ss2012--11--3@12:1 123'
-# DBRowUrl(title='title', url='url',
-#          post_time=post, category=0)
-# tt = re.compile(r"(?P<tt>\d{2-4}[--|-]\d{1,2}[--|-]\d{1,2}(\s|@)\d{1,2}:\d{1,2})")
-tt = re.compile(r"(?P<tt>\d{4}(--|-)\d{1,2}(--|-)\d{1,2}(\s|@)\d{1,2}:\d{1,2})")
-mm = tt.findall(post)[0].replace('--', '-').replace('@', ' ')
-print mm
+import os
+import sys
+import errno
 
 
-import urllib2
+def walk(top, topdown=True, onerror=None, followlinks=False):
+    isfile, islink, join, isdir = os.path.isfile, os.path.islink, os.path.join, os.path.isdir
+    try:
+        names = os.listdir(top)
+    except os.error, os.err:
+        if onerror is not None:
+            onerror(err)
+        return
 
-urllib2.open
+    dirs, files, dlns, flns, others = [], [], [], [], []
+    for name in names:
+        fullname = join(top, name)
+        print "==", fullname
+        if isdir(fullname):
+            print "dir ", fullname
+            if islink(fullname):
+                print "linked ", fullname
+                dlns.append(name)
+            else:
+                dirs.append(name)
+        elif isfile(fullname):
+            print "file ", fullname
+            if islink(fullname):
+                flns.append(name)
+            else:
+                files.append(name)
+        else:
+            print "other ", fullname
+            others.append(name)
+
+    if topdown:
+        yield top, dirs, files, dlns, flns, others
+
+    if followlinks is True:
+        for dlink in dlns:
+            for x in walk(join(top, dlink), topdown, onerror, followlinks):
+                yield x
+
+    if not topdown:
+        yield top, dirs, files, dlns, flns, others
+
+for tmp in walk(top="/Users/pk/lib", followlinks=True):
+    print tmp
+
+# for tmp in os.walk(top="/Users/pk/lib", followlinks=False):
+#     print tmp
+
+
